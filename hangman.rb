@@ -78,6 +78,14 @@ class Hangman
       @word = data['word']
     end
   end
+
+  def list_saves
+    if Dir.exist?('saves')
+      Dir.glob('saves/*').map do |location|
+        location[6..-6]
+      end
+    end
+  end
 end
 
 game = Hangman.new
@@ -89,10 +97,11 @@ until game.game_over?
   puts 'Your guess:'
   input = gets.chomp
   if input == 'save'
-    puts 'Save name:'
+    print 'Save name: '
     game.save(gets.chomp)
   elsif input == 'load'
-    puts 'Load file:'
+    puts "Saves: #{game.list_saves}"
+    print 'Load file: '
     game.load(gets.chomp)
   elsif input == 'exit'
     exit
