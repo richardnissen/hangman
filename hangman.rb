@@ -43,16 +43,16 @@ class Hangman
   end
 
   def clue
-    clue = ''
+    clue = []
     @word.each_char do |c|
       if @guesses.include?(c)
-        clue.concat(c)
+        clue.push(c)
       else
-        clue.concat('_')
+        clue.push('_')
       end
-      clue.concat(' ')
+      clue.push(' ')
     end
-    clue
+    clue.join('')
   end
 
   def guess(guess)
@@ -95,10 +95,10 @@ end
 game = Hangman.new
 puts 'Hangman initialized, write \'save\' for saving and \'load\' for loading and \'exit\' for exiting'
 until game.game_over?
-  puts game.print_man(game.lives)
+  puts game.hangman
   puts game.clue
   puts "Your guesses: #{game.guesses}"
-  puts 'Your guess:'
+  print 'Your guess: '
   input = gets.chomp
   if input == 'save'
     print 'Save name: '
