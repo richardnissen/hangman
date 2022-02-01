@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Printer for the Hangman Game
 module HangmanDrawer
   def print_man(lives)
     hangman = ['''

@@ -1,12 +1,16 @@
-require './hangman_drawer.rb'
+# frozen_string_literal: true
+
+require './hangman_drawer'
 require 'msgpack'
 
+# Main game class
 class Hangman
   include HangmanDrawer
 
   attr_accessor :guesses, :lives, :word
+
   def initialize
-    @guesses = Array.new
+    @guesses = []
     @lives = 6
     @word = random_word
   end
@@ -17,7 +21,10 @@ class Hangman
 
   def random_word
     lines = File.readlines('word-list.txt')
-    lines.select { |line| line.length <= 12 && line.length >= 5 }.sample.strip # 13 and 6 because of the newline character and strip to remove newline
+    # 13 and 6 because of the newline character and strip to remove newline
+    lines.select do |line|
+      line.length <= 12 && line.length >= 5
+    end.sample.strip
   end
 
   def game_over?
@@ -25,42 +32,43 @@ class Hangman
   end
 
   def lost?
-    @lives == 0
+    @lives.zero?
   end
 
   def won?
     @word.each_char do |c|
       return false unless @guesses.include?(c)
     end
-    return true
+    true
   end
 
   def clue
-    clue = ""
+    clue = ''
     @word.each_char do |c|
       if @guesses.include?(c)
-        clue = clue.concat(c)
+        clue.concat(c)
       else
-        clue = clue.concat('_')
+        clue.concat('_')
       end
-      clue = clue.concat(' ')
+      clue.concat(' ')
     end
     clue
   end
 
   def guess(guess)
     guess = guess.downcase
-    if @guesses.include?(guess) || @lives == 0 || guess.length != 1 then return false end
+    return false if @guesses.include?(guess) || @lives.zero? || guess.length != 1
+
     @lives -= 1 unless @word.include?(guess)
     @guesses.push(guess)
   end
 
   def save(filename)
-    msgpack = MessagePack.dump ({
-      :guesses => @guesses,
-      :lives => @lives,
-      :word => @word
-    })
+    msgpack = MessagePack.dump({
+                                 guesses: @guesses,
+                                 lives: @lives,
+                                 word: @word
+                               })
     Dir.mkdir('saves') unless Dir.exist?('saves')
     File.open("saves/#{filename}.save", 'w') do |file|
       file.puts(msgpack)
@@ -68,23 +76,19 @@ class Hangman
   end
 
   def load(filename)
-    unless File.exist?("saves/#{filename}.save")
-      return false
-    else
+    if File.exist?("saves/#{filename}.save")
       msgpack = File.read("saves/#{filename}.save").chomp
       data = MessagePack.load msgpack
       @guesses = data['guesses']
       @lives = data['lives']
       @word = data['word']
+    else
+      false
     end
   end
 
   def list_saves
-    if Dir.exist?('saves')
-      Dir.glob('saves/*').map do |location|
-        location[6..-6]
-      end
-    end
+    Dir.glob('saves/*').map { |location| location[6..-6] } if Dir.exist?('saves')
   end
 end
 
